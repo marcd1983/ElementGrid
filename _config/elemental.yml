@@ -4,5 +4,6 @@ name: elemental-grid
 DNADesign\Elemental\Models\BaseElement:
   extensions:
     - Antlion\ElementalGrid\Extension\BaseElementCMSEditLinkExtension
+    - Antlion\ElementalGrid\Extension\BaseElementColumnWidthExtension
 Antlion\ElementalGrid\Model\ElementalGrid:
   inline_editable: false
