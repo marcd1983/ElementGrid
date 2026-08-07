@@ -11,7 +11,7 @@
 
     <% if $Elements %>
 		<div class="element-grid grid-x <% if not $Top.NoGridSpace %>grid-margin-x grid-margin-y<% end_if %> {$Top.VerticalAlignClass} {$Top.HorizontalAlignClass}" data-listelement-count="$Elements.Elements.Count">
-			<% loop $Elements %>
+			<% loop $Elements.Elements %>
 				{$Me}
 			<% end_loop %>
 		</div>
