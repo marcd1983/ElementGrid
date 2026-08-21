@@ -14,16 +14,39 @@ use SilverStripe\Forms\DropdownField;
  */
 class BaseElementColumnWidthExtension extends Extension
 {
-    /** Width dropdown stored on every BaseElement */
+    /**
+     * Width dropdown stored on every BaseElement.
+     *
+     * The enum lists both the current large-N values and the legacy
+     * fraction-based values ('1/4','1/3','1/2','2/3','full') so that content
+     * saved before the large-N rewrite remains a valid, storable value -
+     * WidthClass()/WidthRatio() below normalise legacy values on read.
+     */
     private static array $db = [
-        // Slashes are fine in Enum items. Default to full.
-        'Width' => "Enum('1/4,1/3,1/2,2/3,full','full')",
+        'Width' => "Enum('large-1,large-2,large-3,large-4,large-5,large-6,large-7,large-8,large-9,large-10,large-11,large-12,auto,shrink,1/4,1/3,1/2,2/3,full','large-12')",
         // 'Padding' => "Enum('none,20px,40px,60px','none')",
     ];
 
     private static array $defaults = [
-        'Width' => 'full',
+        'Width' => 'large-12',
         // 'Padding' => '20px',
+    ];
+
+    /** Legacy fraction-based values (pre large-N rewrite) mapped to their large-N equivalent */
+    private const LEGACY_WIDTH_CLASSES = [
+        '1/4'  => 'large-3',
+        '1/3'  => 'large-4',
+        '1/2'  => 'large-6',
+        '2/3'  => 'large-8',
+        'full' => 'large-12',
+    ];
+
+    private const LEGACY_WIDTH_RATIOS = [
+        '1/4'  => 0.25,
+        '1/3'  => 0.3333,
+        '1/2'  => 0.5,
+        '2/3'  => 0.6667,
+        'full' => 1.0,
     ];
 
    public function updateCMSFields(FieldList $fields): void
@@ -50,14 +73,23 @@ class BaseElementColumnWidthExtension extends Extension
             'Root.Main',
             DropdownField::create('Width', 'Column Width')
                 ->setSource([
-                    '1/4' => '¼ (1/4)',
-                    '1/3' => '⅓ (1/3)',
-                    '1/2' => '½ (1/2)',
-                    '2/3' => '⅔ (2/3)',
-                    'full' => 'Full width',
+                    'large-1'  => '1 col  (1/12 — ~8%)',
+                    'large-2'  => '2 cols (1/6 — ~17%)',
+                    'large-3'  => '3 cols (1/4 — 25%)',
+                    'large-4'  => '4 cols (1/3 — 33%)',
+                    'large-5'  => '5 cols (5/12 — ~42%)',
+                    'large-6'  => '6 cols (1/2 — 50%)',
+                    'large-7'  => '7 cols (7/12 — ~58%)',
+                    'large-8'  => '8 cols (2/3 — 67%)',
+                    'large-9'  => '9 cols (3/4 — 75%)',
+                    'large-10' => '10 cols (5/6 — ~83%)',
+                    'large-11' => '11 cols (11/12 — ~92%)',
+                    'large-12' => '12 cols (Full — 100%)',
+                    'auto'     => 'Auto (fill remaining space)',
+                    'shrink'   => 'Shrink (fit content)',
                 ])
-                ->setEmptyString( '- Choose Column Width -')
-                ->setDescription('Controls how wide this block should render inside the grid.'),
+                ->setEmptyString('- Choose Column Width -')
+                ->setDescription('Controls how wide this block renders inside the grid (Foundation XY Grid, large breakpoint).'),
         );
 
         // $fields->addFieldToTab(
@@ -79,25 +111,26 @@ class BaseElementColumnWidthExtension extends Extension
     /** Helper: CSS class you can use on the block wrapper */
     public function WidthClass(): string
     {
-        return match ($this->owner->Width) {
-            '1/4' => 'large-3',
-            '1/3' => 'large-4',
-            '1/2' => 'large-6',
-            '2/3' => 'large-8',
-            'full' => 'large-12',
-            default => '',
-        };
+        $width = $this->owner->Width;
+
+        return self::LEGACY_WIDTH_CLASSES[$width] ?? ($width ?: 'large-12');
     }
+
     /** Helper: numeric ratio if you need inline styles or calculations */
     public function WidthRatio(): float
     {
-        return match ($this->owner->Width) {
-            '1/4' => 0.25,
-            '1/3' => 0.3333,
-            '1/2' => 0.5,
-            '2/3' => 0.6667,
-            default => 1.0,
-        };
+        $w = $this->owner->Width;
+
+        if (isset(self::LEGACY_WIDTH_RATIOS[$w])) {
+            return self::LEGACY_WIDTH_RATIOS[$w];
+        }
+
+        if (str_starts_with($w, 'large-')) {
+            $cols = (int) substr($w, 6);
+            return $cols > 0 ? round($cols / 12, 4) : 1.0;
+        }
+
+        return 0.0; // auto / shrink have no fixed ratio
     }
     // public function PaddingClass(): string
     // {
