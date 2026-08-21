@@ -1,4 +1,4 @@
-<% cached $ID, $LastEdited, $Elements.Elements.Count, $Elements.Elements.Max('LastEdited') %>
+<%-- <% cached $ID, $LastEdited, $Elements.Elements.Count, $Elements.Elements.Max('LastEdited') %> --%>
 <% if $Title && $ShowTitle %>
     <% with $HeadingTag %>
 		<{$Me} class="element-title">$Up.Title.XML</{$Me}>
@@ -13,8 +13,8 @@
     <% if $Elements %>
 		<div class="element-grid grid-x <% if not $Top.NoGridSpace %>grid-margin-x grid-margin-y<% end_if %> {$Top.VerticalAlignClass} {$Top.HorizontalAlignClass}" data-listelement-count="$Elements.Elements.Count">
 			<% loop $Elements.Elements %>
-				{$Me}
+				<div class="cell {$WidthClass}">{$Me}</div>
 			<% end_loop %>
 		</div>
 	<% end_if %>
-<% end_cached %>
+<%-- <% end_cached %> --%>

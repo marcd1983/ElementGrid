@@ -6,5 +6,6 @@ DNADesign\Elemental\Models\BaseElement:
     - App\Extensions\NestedElementCMSEditLinkExtension
     # - Antlion\ElementalGrid\Extension\BaseElementCMSEditLinkExtension
     - Antlion\ElementalGrid\Extension\BaseElementColumnWidthExtension
+    
 Antlion\ElementalGrid\Model\ElementGrid:
   inline_editable: false
